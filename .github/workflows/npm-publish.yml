@@ -1,0 +1,66 @@
+name: Playwright Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      course:
+        description: 'Enter the course name'
+        required: true
+        type: choice
+        options:
+          - 'Course name Green computing'
+          - 'Course name Computational Statistics'
+          - 'Course name Introduction to Data Base Management Systems'
+          - 'Course name Object Oriented Programming Using Java'
+          - 'Course name Network Basics'
+          
+      module:
+        description: 'Select the module name'
+        required: true
+        type: choice
+        options:
+          - 'Module 1'
+          - 'Module 2'
+          - 'Module 3'
+          - 'Module 4'
+          - 'Module 5'
+      timeout:
+        description: 'Enter the timeout in milliseconds'
+        required: false
+        default: '60000'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.7.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        env:
+          USER_NAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          URL: ${{ secrets.URL }}
+          
+          COURSE: ${{ github.event.inputs.course }}
+          MODULE: ${{ github.event.inputs.module }}
+          TIMEOUT: ${{ github.event.inputs.timeout }}
+        run: npx playwright test
+      
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
